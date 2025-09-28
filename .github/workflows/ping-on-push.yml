@@ -1,0 +1,30 @@
+name: Ping on push to main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_URL: ${{ secrets.TARGET_URL }}  # Repository secret에 TARGET_URL을 저장하세요
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Send GET request to TARGET_URL
+        run: |
+          if [ -z "${TARGET_URL}" ]; then
+            echo "ERROR: TARGET_URL is not set. Add it to repository secrets (Settings → Secrets → Actions)."
+            exit 1
+          fi
+
+          echo "Requesting: ${TARGET_URL}"
+          # curl 옵션:
+          # -sS : silent but show errors
+          # --fail : return non-zero on HTTP >= 400 (so action fails)
+          # --location : follow redirects
+          # --retry 3 : retry transient failures
+          curl -sS --fail --location --retry 3 "${TARGET_URL}"
